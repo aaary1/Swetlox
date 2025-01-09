@@ -15,7 +15,7 @@ function Fullchat() {
     {
       id: 3,
       sender: "self-end",
-      content: "My height is 6.6 and my mobile no is 9537519564",
+      content: "My height is 6.6 and my mobile no is ********",
     },
     
   ];
