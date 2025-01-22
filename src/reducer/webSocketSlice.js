@@ -13,7 +13,6 @@ const webSocketSlice = createSlice({
     addMessage: (state, action) => {
       state.messages.push(action.payload);
     },
-    
   },
 });
 

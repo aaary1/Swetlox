@@ -8,6 +8,9 @@ import Comment from "../Profile/Comment.jsx";
 import Loadder from "../loadder/Loadder";
 import CommentDialog from "../CommentDialogBox";
 import { formatDistanceToNow } from "date-fns";
+import ShareIcon from "@mui/icons-material/Share";
+import { shareService } from "../share/ShareService";
+import LikeUserDialogBox from "./LikeUserDialogBox";
 
 function Post({ post }) {
   const [isLike, setLike] = useState(false);
@@ -17,6 +20,8 @@ function Post({ post }) {
   const [isLoading, setLoading] = useState(false);
   const [commentDialogOpen, setCommentDialogOpen] = useState(false);
   const [commentList, setCommentList] = useState([]);
+  const [isUserLikeDialogBoxOpen, setUserLikeDailogBox] = useState(false);
+  const [isShowMoreCaption, setShowMoreCaption] = useState(false);
 
   useEffect(() => {
     setLike(post.like);
@@ -28,8 +33,8 @@ function Post({ post }) {
     const date = new Date(dateString);
     return formatDistanceToNow(date, { addSuffix: true });
   }
+
   const handleLike = async (postId) => {
-    console.log("Current Like State:", isLike);
     const newLikeState = !isLike;
     setLike(newLikeState);
 
@@ -59,17 +64,54 @@ function Post({ post }) {
     }
   };
 
+  const handleShare = async () => {
+    const metaData = {
+      url: "",
+      text: "",
+      title: "",
+    };
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "My Title",
+          text: "Check out this link!",
+          url: "https://www.google.com",
+        });
+        console.log("Shared successfully");
+      } catch (error) {
+        console.error("Error sharing:", error);
+      }
+    } else {
+      console.error("Web Share API is not supported on this browser.");
+    }
+  };
+
   const handleComment = (value) => {
     setComment(value);
   };
+
   const handleCommentSubmit = async () => {
     setLoading(true);
-    const formData = new FormData();
-    formData.append("postId", post.postId);
-    formData.append("content", comment);
-    await privateApi.post("/post/comment", formData);
+    const payload = {
+      entityId: post.postId,
+      entityType: "POST",
+      commentContent: comment,
+    };
+    await privateApi.post("/post/comment", payload, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
     setLoading(false);
     setComment("");
+  };
+
+  const handleOpenLikeDisplayDialogBox = () => {
+    setUserLikeDailogBox(true);
+  };
+
+  const handleCloseUserLikeDialogBox = () => {
+    setUserLikeDailogBox(false);
   };
 
   const handleCommentDialogOpen = () => {
@@ -79,39 +121,57 @@ function Post({ post }) {
     setCommentDialogOpen(false);
   };
 
+  const handleShowMoreCaption = () => {
+    setShowMoreCaption((prev) => !prev);
+  };
+
+  console.log(post);
   return (
     <>
-      <div className="bg-[#152331] w-full rounded-xl p-2 mb-4">
+      <div className="bg-[#152331] w-full rounded-xl p-4 mb-4">
         <PostHeader
-          userName={post.userName}
+          userName={post.postUser.userName}
           createdAt={timeAgo(post.createdAt)}
+          profileURL={post.postUser.profileURL}
         />
-        <div className="m-3">
+        <div className="">
           <img
             src={post.postURL}
             alt="Post content"
             className="rounded-xl w-full h-full object-cover"
           />
         </div>
-        <div className="w-full h-[42px] flex justify-between text-white">
-          <div className="flex space-x- ml-3 gap-3">
-            <div>
+
+        {/* Like, Comment, Share, and Bookmark Section */}
+        <div className="w-full flex justify-between text-white pt-2">
+          <div className="flex ml-3 gap-4">
+            <div className="flex flex-col">
               <FavoriteBorderIcon
                 onClick={() => handleLike(post.postId)}
                 style={{ fontSize: "32px" }}
                 className={`cursor-pointer ${isLike ? "text-red-600" : ""}`}
               />
-              <p className="text-center">{likeCount}</p>
             </div>
+
+            {/* Comment Section */}
             <div>
               <CommentIcon
                 className="cursor-pointer"
                 style={{ fontSize: "32px" }}
                 onClick={handleCommentDialogOpen}
               />
-              <p className="text-center">{}</p>
+            </div>
+
+            {/* Share Section */}
+            <div onClick={handleShare}>
+              <ShareIcon
+                className="cursor-pointer"
+                style={{ fontSize: "32px" }}
+              />
             </div>
           </div>
+
+          {/* Bookmark Section */}
           <BookmarkBorderIcon
             onClick={() => handleBookMark(post.postId)}
             className={`cursor-pointer text ${
@@ -120,28 +180,63 @@ function Post({ post }) {
             style={{ fontSize: "32px" }}
           />
         </div>
-        <div className="mx-4 mt-2">
-          <p className="text-lg text-white mt-3">{post.caption}</p>
+        <div className="flex flex-col justify-start">
+          <p className="text-white ml-6">{likeCount}</p>
+          <p
+            className="text-white pt-1 cursor-pointer"
+            onClick={handleOpenLikeDisplayDialogBox}
+          >
+            {likeCount > 0
+              ? `Liked by ${likeCount} people`
+              : "Be the first to like!"}
+          </p>
         </div>
+        {/* Caption Section */}
+        <div className=" mt-2">
+          {post?.caption.length > 0 && (
+            <p className="text-lg text-white mt-3">
+              {isShowMoreCaption
+                ? post.caption + " "
+                : post.caption.substring(0, 100) + " "}
+              {
+                <span
+                  className="font-bold cursor-pointer"
+                  onClick={handleShowMoreCaption}
+                >
+                  {" "}
+                  {isShowMoreCaption ? "showless..." : "showmore..."}
+                </span>
+              }
+            </p>
+          )}
+        </div>
+
+        {/* Comment Input Section */}
         <div className="py-2 w-[100%]">
           {isLoading ? (
             <div className="w-[100%] flex justify-center items-center">
-              <Loadder></Loadder>
+              <Loadder />
             </div>
           ) : (
             <Comment
               comment={comment}
               handleComment={handleComment}
               handleCommentSubmit={handleCommentSubmit}
-            ></Comment>
+            />
           )}
         </div>
       </div>
+
+      {/* Comment and Like Dialog Boxes */}
       <CommentDialog
         open={commentDialogOpen}
         onClose={handleCommentDialogClose}
         postId={post.postId}
-      ></CommentDialog>
+      />
+      <LikeUserDialogBox
+        open={isUserLikeDialogBoxOpen}
+        onClose={handleCloseUserLikeDialogBox}
+      />
     </>
   );
 }

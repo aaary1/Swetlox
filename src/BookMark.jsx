@@ -6,11 +6,13 @@ import {
   CardMedia,
   Typography,
   Grid,
-  CircularProgress,
   Fade,
   IconButton,
+  Tooltip,
+  Button,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
+import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import { privateApi } from "./utils/api";
 import Loadder from "./loadder/Loadder";
 
@@ -60,7 +62,6 @@ function BookMark() {
   const handleDeletePost = async (postId) => {
     try {
       await privateApi.delete(`/post/bookmark-delete/${postId}`);
-      console.log(postId);
       setSavedPosts((prevPosts) =>
         prevPosts.filter((post) => post?.postId !== postId && post != null)
       );
@@ -71,8 +72,8 @@ function BookMark() {
 
   if (loading) {
     return (
-      <div className="w-[100%] h-[100%] flex justify-center item-center">
-        <Loadder></Loadder>
+      <div className="w-full h-screen flex justify-center items-center">
+        <Loadder />
       </div>
     );
   }
@@ -80,72 +81,120 @@ function BookMark() {
   return (
     <Box
       sx={{
-        padding: 3,
-        width: "700px",
-        maxWidth: 1200,
-        marginLeft: "405px",
-        bgcolor: "#1c1c1c",
-        marginTop: "100px",
+        padding: 0,
+        width: 707,
+        marginTop: "98px",
+        marginLeft: "400px",
+        bgcolor: "#0c0a15",
+        borderRadius: 4,
+        // mt: 5,
+        boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.2)",
       }}
     >
       <Typography
-        variant="h4"
-        gutterBottom
-        sx={{ mb: 4, color: "#333", fontWeight: "bold", color: "white" }}
+        variant="h6"
+        component="div"
+        sx={{
+          backgroundColor: "#152331",
+          padding: "16px",
+          borderBottom: "1px solid #333333",
+          zIndex: 10,
+          color: "white",
+        }}
       >
         Saved Posts
       </Typography>
-      <Grid container spacing={3}>
-        {savedPosts.map((post) => (
-          <Grid item xs={12} sm={6} md={4} key={post?.postId}>
-            <Fade in={true} timeout={500}>
-              <Card
-                sx={{
-                  maxWidth: 345,
-                  height: 340,
-                  transition: "transform 0.3s, box-shadow 0.3s",
-                  "&:hover": {
-                    transform: "scale(1.05)",
-                    boxShadow: "0 8px 16px rgba(0,0,0,0.2)",
-                  },
-                  borderRadius: 2,
-                  bgcolor: "background.paper",
-                  position: "relative",
-                  overflow: "hidden",
-                }}
-              >
-                <CardMedia
-                  component="img"
-                  height="140"
-                  image={post ? post.postURL : ""}
-                  alt={post ? post.title : "This post is invalid or deleted"}
+      {savedPosts.length === 0 ? (
+        <Typography
+          variant="h6"
+          sx={{ textAlign: "center", color: "#CBD5E0", mt: 4 }}
+        >
+          No saved posts yet! Start saving posts to view them here.
+        </Typography>
+      ) : (
+        <Grid container spacing={4} padding={2}>
+          {savedPosts.map((post) => (
+            <Grid item xs={12} sm={6} md={4} key={post?.postId}>
+              <Fade in={true} timeout={500}>
+                <Card
                   sx={{
-                    transition: "opacity 0.3s",
+                    maxWidth: 360,
+                    transition: "transform 0.3s, box-shadow 0.3s",
                     "&:hover": {
-                      opacity: 0.8,
+                      transform: "scale(1.05)",
+                      boxShadow: "0px 6px 18px rgba(0, 0, 0, 0.3)",
                     },
-                    height: "200px",
+                    borderRadius: 3,
+                    bgcolor: "transparent",
+                    color: "#F8FAFC",
+                    cursor: "pointer",
+                    border: "1px solid #333333",
                   }}
-                />
-                <CardContent>
-                  <Typography variant="h6" component="div" sx={{ mb: 1 }}>
-                    {post?.title}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {post ? post.caption : ""}
-                  </Typography>
-                </CardContent>
-                <IconButton
-                  sx={{ position: "absolute", top: 5, right: 5 }}
-                  onClick={() => handleDeletePost(post.postId)}
                 >
-                  <DeleteIcon sx={{ color: "red" }} />
-                </IconButton>
-              </Card>
-            </Fade>
-          </Grid>
-        ))}
-      </Grid>
+                  <CardMedia
+                    component="img"
+                    // height="180"
+                    image={post?.postURL || ""}
+                    alt={post?.title || "Invalid post"}
+                    sx={{
+                      transition: "opacity 0.3s",
+                      borderRadius: "3px 3px 0 0",
+                      "&:hover": {
+                        opacity: 0.9,
+                      },
+                      height: "150px",
+                      objectFit:"cover"
+                    }}
+                  />
+                  <CardContent>
+                    <Typography
+                      variant="h6"
+                      sx={{ fontWeight: "bold", color: "#F1F5F9", mb: 1 }}
+                    >
+                      {post?.title || "Untitled Post"}
+                    </Typography>
+                    <Typography variant="body2" color="#94A3B8">
+                      {post?.caption || "No description available."}
+                    </Typography>
+                  </CardContent>
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      top: 10,
+                      right: 10,
+                      display: "flex",
+                      gap: 1,
+                    }}
+                  >
+                    <Tooltip title="Delete">
+                      <IconButton
+                        sx={{
+                          bgcolor: "black",
+                          "&:hover": { bgcolor: "rgba(255, 0, 0, 0.5)" },
+                        }}
+                        onClick={() => handleDeletePost(post.postId)}
+                        size="small"
+                      >
+                        <DeleteIcon sx={{ color: "white" }} />
+                      </IconButton>
+                    </Tooltip>
+                    {/* <Tooltip title="Bookmark">
+                      <IconButton
+                        sx={{
+                          bgcolor: "rgba(255, 255, 255, 0.2)",
+                          "&:hover": { bgcolor: "rgba(0, 255, 0, 0.5)" },
+                        }}
+                      >
+                        <BookmarkBorderIcon sx={{ color: "#10B981" }} />
+                      </IconButton>
+                    </Tooltip> */}
+                  </Box>
+                </Card>
+              </Fade>
+            </Grid>
+          ))}
+        </Grid>
+      )}
     </Box>
   );
 }

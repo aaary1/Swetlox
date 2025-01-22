@@ -8,26 +8,35 @@ import {
 } from "@mui/material";
 import { Box } from "@mui/system";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { privateApi } from "../utils/api";
 
 const SearchUser = ({ user }) => {
   const [text, setText] = useState();
+  const navigate = useNavigate();
   const isFollowing = user.following;
   const isFollower = user.follower;
   const userIsFollowingAuth = user.userIsFollowingAuth;
+  const isRequested = user.requested;
   const handleFollow = async (userId) => {
-    if (text !== "Following") {
-      setText("Following");
-      await privateApi.get(`/user/acceptRequest/${userId}`);
+    if (text !== "Requested") {
+      setText("Requested");
+      await privateApi.get(`/user/following-request/${userId}`);
     }
   };
   useEffect(() => {
-    if (!isFollowing && !userIsFollowingAuth) setText("Follow");
+    if (!isFollowing && !userIsFollowingAuth && !isRequested) setText("Follow");
+    else if (isRequested) setText("Requested");
     else if (!isFollowing && userIsFollowingAuth) setText("Follow Back");
     else if (isFollowing) {
       setText("Following");
     }
   }, [user]);
+
+  const handleProfileClick = () => {
+    navigate(`/profile/${user.userId}`);
+  };
+
   return (
     <ListItem
       key={user.userId}
@@ -40,7 +49,7 @@ const SearchUser = ({ user }) => {
       }}
     >
       <Box sx={{ display: "flex", alignItems: "center" }}>
-        <ListItemAvatar>
+        <ListItemAvatar onClick={handleProfileClick}>
           <Avatar src={user.profileURL} alt={user.userName} />
         </ListItemAvatar>
         <ListItemText
@@ -50,6 +59,7 @@ const SearchUser = ({ user }) => {
         />
       </Box>
       <Box>
+        {}
         {!isFollowing && !userIsFollowingAuth && (
           <Button
             onClick={() => handleFollow(user.userId)}
@@ -65,6 +75,7 @@ const SearchUser = ({ user }) => {
             {text}
           </Button>
         )}
+
         {!isFollowing && userIsFollowingAuth && (
           <Button
             variant="contained"

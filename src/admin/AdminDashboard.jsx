@@ -32,6 +32,7 @@ const AdminDashboard = () => {
           },
         }
       );
+      console.log(data);
       const filterData = data.content.filter(
         (user) => user.userName != "admin"
       );

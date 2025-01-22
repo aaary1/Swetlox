@@ -4,7 +4,6 @@ function Istory({ storyImg, profileImg, isUserStory, onAddStory, userName }) {
   console.log(userName);
   return (
     <div className="relative w-[110px] h-[193px]  rounded-xl overflow-hidden bg-gray-200 hover:cursor-pointer ">
-      <h1 className="z-40 font-bold text-center">{userName?.toUpperCase()}</h1>
       <img
         src={profileImg}
         className="absolute w-[100%] h-[100%] object-cover blur-sm"
@@ -16,6 +15,9 @@ function Istory({ storyImg, profileImg, isUserStory, onAddStory, userName }) {
               +
             </div>
           </div>
+          <p className="text-nowrap overflow-hidden font-bold">
+            {userName?.toUpperCase()}
+          </p>
         </>
       ) : (
         <>
@@ -24,14 +26,18 @@ function Istory({ storyImg, profileImg, isUserStory, onAddStory, userName }) {
             alt="Story"
             className="w-full h-full object-cover blur-sm z-0"
           />
-
-          <div className="absolute bottom-2 left-2 w-12 h-12 ml-5 rounded-full overflow-hidden border-2 border-white">
-            <img
-              src={profileImg}
-              alt="Profile"
-              className="w-full h-full object-cover"
-            />
+          <div className="absolute w-[100%] flex flex-col justify-center items-center bottom-2     ">
+            <div className="w-12 h-12 rounded-full border-2 border-white overflow-hidden">
+              <img
+                src={profileImg}
+                alt="Profile"
+                className="w-full h-full object-cover"
+              />
+            </div>
           </div>
+          <h1 className="text-nowrap text-white overflow-hidden font-bold">
+            {userName?.toUpperCase()}
+          </h1>
         </>
       )}
     </div>

@@ -1,16 +1,18 @@
-import Profiledetails from "./Profiledetails";
-import React, { useEffect, useState } from "react";
-import { privateApi } from "../utils/api";
+import { useEffect, useState } from "react";
+import { useParams, useSearchParams } from "react-router-dom";
 import Loadder from "../loadder/Loadder";
-import { useSelector } from "react-redux";
-function Profile() {
+import Profiledetails from "../Profile/Profiledetails";
+import { privateApi } from "../utils/api";
+import OtherProfileDetails from "./OtherProfileDetails";
+
+const OtherProfile = () => {
   const [profileData, setProfileData] = useState();
   const [isLoading, setLoading] = useState(true);
-  const userId = useSelector((state) => state.userDetails.user.id);
+  const { userId } = useParams();
   const fetchProfileData = async () => {
+    console.log(`/user/profile-data/${userId}`);
     try {
       const { data } = await privateApi.get(`/user/profile-data/${userId}`);
-      console.log(data);
       setProfileData(data);
       setLoading(false);
     } catch (ex) {
@@ -19,7 +21,7 @@ function Profile() {
   };
   useEffect(() => {
     fetchProfileData();
-  }, []);
+  }, [userId]);
   if (isLoading) {
     return (
       <div>
@@ -27,12 +29,11 @@ function Profile() {
       </div>
     );
   }
-  
+
   return (
     <>
-      <Profiledetails profiledetails={profileData} />
+      <OtherProfileDetails profiledetails={profileData} userId={userId} />
     </>
   );
-}
-
-export default Profile;
+};
+export default OtherProfile;

@@ -1,20 +1,171 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
-import "../css/c.css";
 import { privateApi } from "../utils/api";
 import { useSelector } from "react-redux";
+import {
+  Box,
+  Avatar,
+  IconButton,
+  TextField,
+  Typography,
+  Button,
+  LinearProgress,
+} from "@mui/material";
+import SendIcon from "@mui/icons-material/Send";
+import AttachFileIcon from "@mui/icons-material/AttachFile";
+import KeyboardVoiceIcon from "@mui/icons-material/KeyboardVoice";
+import StopIcon from "@mui/icons-material/Stop";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { PlayArrow, Pause } from "@mui/icons-material";
+import VideoMessage from "./VideoMessage";
+import CloseIcon from "@mui/icons-material/Close";
+
+const messagess = [
+  {
+    type: "text",
+    sender: "6779235bb9224430096f62cc", // Replace with the logged-in user's ID
+    content: "Hey, what are you up to?",
+    mediaType: { getData: "Hey, what are you up to?" }, // Text content
+  },
+  {
+    type: "text",
+    sender: "user2",
+    content: "Not much, just relaxing! How about you?",
+    mediaType: { getData: "Not much, just relaxing! How about you?" }, // Text content
+  },
+  {
+    type: "voice",
+    sender: "6779235bb9224430096f62cc",
+    mediaType: {
+      getData: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+    }, // Voice message URL
+  },
+  {
+    type: "image",
+    sender: "user2",
+    mediaType: {
+      getData:
+        "http://res.cloudinary.com/dkbbhmnk6/image/upload/v1736275220/pe0jsrxtmdpxeqp3vtxc.jpg",
+    }, // Image URL
+  },
+  {
+    type: "text",
+    sender: "6779235bb9224430096f62cc",
+    content: "Check out this cool picture I found!",
+    mediaType: { getData: "Check out this cool picture I found!" }, // Text content
+  },
+  {
+    type: "video",
+    sender: "user1",
+    mediaType: { getData: "https://www.w3schools.com/html/mov_bbb.mp4" }, // Video URL
+  },
+  {
+    type: "text",
+    sender: "user2",
+    content: "That's awesome! Thanks for sharing!",
+    mediaType: { getData: "That's awesome! Thanks for sharing!" }, // Text content
+  },
+];
 
 function Fullchat() {
   const location = useLocation();
   const [chatUser, setChatUser] = useState(null);
-  const chatRef = useRef();
-  const messageEndRef = useRef(null); // Ref to scroll to the last message
+  const [chatText, setChatText] = useState("");
+  const messageEndRef = useRef(null);
   const userDetails = useSelector((state) => state.userDetails);
-  const messageData = useSelector((state) => state.webSocket.messages); // Redux state for WebSocket messages
+  const messageData = useSelector((state) => state.webSocket.messages);
   const [messages, setMessages] = useState([]);
-
+  const [isRecording, setIsRecording] = useState(false);
+  const [audioBlob, setAudioBlob] = useState(null);
+  const [audioUrl, setAudioUrl] = useState("");
+  const mediaRecorderRef = useRef(null);
+  const [selectedFile, setSelectedFile] = useState();
+  const fileInputRef = useRef(null);
   const searchParam = new URLSearchParams(location.search);
   const id = searchParam.get("id");
+
+  const handleSendMessage = (payload) => {
+    const formData = new FormData();
+    formData.append("sender", userDetails.user.id);
+    formData.append("recipient", id);
+    formData.append("content", chatText);
+    if (payload.mediaType == "text") {
+      if (chatText.trim() === "") return;
+      formData.append("mediaType", "TEXT");
+      console.log("text message");
+
+      handleSendMessageApi(formData, "TEXT");
+      return;
+    }
+    if (payload.mediaType == "image") {
+      if (selectedFile == null) return;
+      formData.append("mediaType", "IMAGE");
+      formData.append("media", selectedFile);
+      console.log(formData);
+
+      handleSendMessageApi(formData, "IMAGE");
+      setSelectedFile(null);
+      return;
+    }
+    if (payload.mediaType == "video") {
+      if (selectedFile == null) return;
+      formData.append("mediaType", "VIDEO");
+      formData.append("media", selectedFile);
+
+      handleSendMessageApi(formData, "VIDEO");
+      setSelectedFile(null);
+      return;
+    }
+    if (payload.mediaType == "VOICE") {
+      console.log("audio");
+      formData.append("mediaType", "VOICE");
+      formData.append("media", audioBlob);
+      console.log(formData);
+      handleSendMessageApi(formData, "VOICE");
+      setAudioBlob(null);
+      setAudioUrl("");
+      return;
+    }
+  };
+
+  const handleIconClick = () => {
+    // Trigger the hidden file input click
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+      // console.log()
+      console.log(file);
+    }
+  };
+
+  const startRecording = async () => {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const mediaRecorder = new MediaRecorder(stream);
+    mediaRecorderRef.current = mediaRecorder;
+
+    mediaRecorder.ondataavailable = (event) => {
+      if (event.data instanceof Blob) {
+        console.log("audio is blob");
+      }
+      setAudioBlob(event.data);
+      setAudioUrl(URL.createObjectURL(event.data));
+    };
+
+    mediaRecorder.start();
+    setIsRecording(true);
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current) {
+      mediaRecorderRef.current.stop();
+    }
+    setIsRecording(false);
+  };
 
   const fetchChatUser = async () => {
     const { data } = await privateApi.get(`/user/get-user/${id}`);
@@ -25,44 +176,58 @@ function Fullchat() {
     await privateApi.get(`/chat/create-chatroom/${id}`);
   };
 
-  const handleSendMessage = async () => {
-    const messageInput = chatRef.current;
-    const message = messageInput.value;
-    if (message.trim() === "") return;
-
-    const formData = new FormData();
-    formData.append("sender", userDetails.user.email);
-    formData.append("recipient", id);
-    formData.append("content", message);
+  const handleSendMessageApi = async (formData, mediaType) => {
+    const media = {};
+    if (mediaType == "TEXT") {
+      media["content"] = formData.get("content");
+    } else if (mediaType == "VIDEO") {
+      media["videoURL"] = URL.createObjectURL(formData.get("media"));
+      media["content"] = formData.get("content");
+    } else if (mediaType == "IMAGE") {
+      media["imageURL"] = URL.createObjectURL(formData.get("media"));
+      media["content"] = formData.get("content");
+    } else if (mediaType == "VOICE") {
+      media["voiceURL"] = URL.createObjectURL(formData.get("media"));
+      media["content"] = formData.get("content");
+    }
     setMessages((prev) => [
       ...prev,
-      { sender: userDetails.user.email, recipient: id, content: message },
+      {
+        senderId: userDetails.user.id,
+        recipientId: id,
+        media,
+        mediaType,
+        timeStamp: new Date().getTime(),
+      },
     ]);
+    setChatText("");
     await privateApi.post("/message/send-message", formData);
-    messageInput.value = "";
     scrollToBottom();
   };
 
-  const fetchMessage = async () => {
+  const fetchMessages = async () => {
     const { data } = await privateApi.get(`/message/load-message/${id}`);
-    setMessages((prev) => [...prev, ...data]);
+    setMessages(data);
   };
 
   useEffect(() => {
     setMessages([]);
     fetchChatUser();
     createChatRoom();
-    fetchMessage();
+    fetchMessages();
   }, [id]);
 
   useEffect(() => {
     if (messageData && messageData.length > 0) {
-      const lastMessage = messageData[messageData.length - 1];
-      if (lastMessage.recipient === id || lastMessage.sender === id) {
-        setMessages((prev) => [...prev, lastMessage]);
-      }
+      setMessages((prev) => {
+        const lastMessage = messageData[messageData.length - 1];
+        const isDuplicate = prev.some(
+          (msg) => msg.messageId === lastMessage.messageId
+        );
+        return isDuplicate ? prev : [...prev, lastMessage];
+      });
     }
-  }, [messageData, id]);
+  }, [messageData]);
 
   useEffect(() => {
     scrollToBottom();
@@ -72,74 +237,329 @@ function Fullchat() {
     messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  {
+    /* console.log(message.senderId === userDetails.user.id+" voice message") */
+  }
+  console.log(userDetails.user.id);
+  console.log(messageData);
   return (
-    <>
-      <div className="w-[710px] h-[590px] mt-24 rounded-xl ml-[400px] bg-[#0c0a15] fixed p-2">
-        <div className="bg-[#170e30] w-full h-16 rounded-xl flex flex-row ">
-          <div>
-            <img
-              src={chatUser?.profileURL}
-              className="w-[50px] m-[7px] ml-3 h-[49px] rounded-full hover:cursor-pointer"
-              alt=""
-            />
-          </div>
-          <div className="my-2 ml-1">
-            <h1 className="font-bold text-white">{chatUser?.fullName}</h1>
-            <h5 className="text-white hover:cursor-pointer">
-              @{chatUser?.userName}
-            </h5>
-          </div>
-        </div>
+    <Box
+      sx={{
+        width: "710px",
+        height: "84vh",
+        marginTop: "95px",
+        marginLeft: "400px",
+        borderRadius: "16px",
+        bgcolor: "#0c0a15",
+        boxShadow: "0px 4px 16px rgba(0, 0, 0, 0.4)",
+        p: 1,
+      }}
+    >
+      {/* Header */}
+      <Box
+        sx={{
+          bgcolor: "#152331",
+          p: 1,
+          borderRadius: "12px",
+          display: "flex",
+          alignItems: "center",
+          mb: 3,
+        }}
+      >
+        <Avatar
+          src={chatUser?.profileURL}
+          sx={{
+            width: 60,
+            height: 60,
+            mr: 2,
+            border: "2px solid #ffffff",
+          }}
+          alt="Profile"
+        />
+        <Box>
+          <Typography variant="h6" sx={{ color: "white", fontWeight: "bold" }}>
+            {chatUser?.fullName}
+          </Typography>
+          <Typography variant="body2" sx={{ color: "#b0b0b0" }}>
+            @{chatUser?.userName}
+          </Typography>
+        </Box>
+      </Box>
 
-        <div className="flex flex-col w-full h-[450px] mt-2 overflow-y-scroll no-scrollbar">
-          {messages.map((message, index) => (
-            <div
-              key={index}
-              className={`${
-                message.sender === userDetails.user.email
-                  ? "self-end bg-blue-500"
-                  : "self-start bg-gray-700"
-              } w-fit max-w-[300px] mb-2 rounded-xl `}
-            >
-              <h1 className="text-white font-medium m-2 p-1">
-                {message.content}
-              </h1>
-            </div>
-          ))}
-          <div ref={messageEndRef} />
-        </div>
-
-        <div className="absolute inset-x-0 bottom-0 mx-2">
-          <div className="flex">
-            <div>
-              <button className="bg-black w-[60px] h-12 rounded-l-md">
-                <img
-                  src="src/image/Message1.png"
-                  alt=""
-                  className="w-[30px] ml-4"
-                />
-              </button>
-            </div>
-            <div>
-              <input
-                type="text"
-                className="w-[585px] h-12 bg-black focus:outline-none hover:cursor-pointer caret-white pl-2 text-gray-200 pb-1"
-                placeholder="Type here your messages......"
-                ref={chatRef}
-              />
-            </div>
-            <div>
-              <button
-                className="bg-black w-[50px] h-12 rounded-r-md"
-                onClick={handleSendMessage}
+      {/* Messages Area */}
+      <Box
+        sx={{
+          height: "407px",
+          overflowY: "auto",
+          // mb: 3,
+          display: "flex",
+          flexDirection: "column",
+          // gap: 2,
+          // p: 1,
+          "&::-webkit-scrollbar": {
+            display: "none", // Hides scrollbar in webkit browsers (Chrome, Safari)
+          },
+          scrollbarWidth: "none",
+        }}
+      >
+        {messages.map((message, index) => (
+          <Box
+            key={index}
+            sx={{
+              display: "flex",
+              justifyContent:
+                message.senderId === userDetails.user.id
+                  ? "flex-end" // Sender's messages aligned to the right
+                  : "flex-start", // Receiver's messages aligned to the left
+              mb: 1,
+            }}
+          >
+            {message.mediaType === "TEXT" ? (
+              <Box
+                sx={{
+                  bgcolor:
+                    message.senderId === userDetails.user.id
+                      ? "#3a68d0" // Blue for sender's messages
+                      : "#222", // Dark gray for receiver's messages
+                  color: "white",
+                  borderRadius: "12px",
+                  p: "10px 14px",
+                  maxWidth: "80%",
+                  boxShadow: 2,
+                  fontSize: "14px", // Adjust text size
+                }}
               >
-                <img src="src/image/Msgicon.png" alt="" className="w-[30px]" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </>
+                {message.media.content}
+              </Box>
+            ) : message.mediaType === "VOICE" ? (
+              <Box
+                sx={{
+                  bgcolor:
+                    message.senderId === userDetails.user.id
+                      ? "#3a68d0" // Blue for sender's messages
+                      : "#222",
+                  p: "10px",
+                  borderRadius: "12px",
+                  boxShadow: 3,
+                  maxWidth: "300px",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                <audio
+                  controls
+                  src={message.media.voiceURL}
+                  style={{
+                    maxWidth: "100%",
+                    borderRadius: "8px",
+                  }}
+                ></audio>
+              </Box>
+            ) : message.mediaType === "IMAGE" ? (
+              <Box
+                sx={{
+                  bgcolor:
+                    message.senderId === userDetails.user.id
+                      ? "#3a68d0"
+                      : "#222",
+                  p: "10px",
+                  borderRadius: "12px",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems:
+                    message.senderId === userDetails.user.id
+                      ? "flex-end"
+                      : "flex-start",
+                }}
+              >
+                <img
+                  src={message.media.imageURL}
+                  alt="message"
+                  style={{
+                    width: "300px",
+                    maxHeight: "300px",
+                    borderRadius: "12px",
+                    objectFit: "cover",
+                  }}
+                />
+                <Box
+                  sx={{
+                    bgcolor:
+                      message.senderId === userDetails.user.id
+                        ? "#3a68d0"
+                        : "#222",
+
+                    borderRadius: "12px",
+                    color: "white",
+                    mt: 1,
+                  }}
+                >
+                  {message.media.content}
+                </Box>
+              </Box>
+            ) : (
+              <VideoMessage message={message}></VideoMessage>
+            )}
+          </Box>
+        ))}
+
+        <div ref={messageEndRef} />
+      </Box>
+
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          // alignItems: "center",
+          bgcolor: "#222222",
+          borderRadius: "8px",
+          p: 1,
+          position: "relative",
+          marginTop: "10px",
+        }}
+      >
+        {/* File Preview Section */}
+        {selectedFile && (
+          <Box
+            sx={{
+              position: "relative",
+              display: "inline-block",
+              marginBottom: "10px",
+            }}
+          >
+            {/* Render Preview Based on File Type */}
+            {selectedFile.type.startsWith("video/") ? (
+              <video
+                controls
+                src={URL.createObjectURL(selectedFile)}
+                style={{
+                  maxWidth: "200px",
+                  maxHeight: "120px",
+                  borderRadius: "8px",
+                }}
+              />
+            ) : (
+              <img
+                src={URL.createObjectURL(selectedFile)}
+                alt="Preview"
+                style={{
+                  maxWidth: "200px",
+                  maxHeight: "120px",
+                  borderRadius: "8px",
+                }}
+              />
+            )}
+
+            {/* Cross Icon */}
+            <IconButton
+              onClick={() => setSelectedFile(null)}
+              sx={{
+                position: "absolute",
+                top: "5px",
+                right: "5px",
+                backgroundColor: "rgba(0, 0, 0, 0.6)",
+                color: "white",
+                "&:hover": {
+                  backgroundColor: "rgba(0, 0, 0, 0.8)",
+                },
+              }}
+            >
+              <CloseIcon></CloseIcon>
+            </IconButton>
+          </Box>
+        )}
+
+        {/* Main Input Section */}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            width: "100%",
+          }}
+        >
+          <IconButton onClick={handleIconClick}>
+            <AttachFileIcon className="text-gray-500" />
+            <input
+              type="file"
+              ref={fileInputRef}
+              style={{ display: "none" }}
+              onChange={handleFileChange}
+            />
+          </IconButton>
+          {audioBlob ? (
+            <Box
+              sx={{
+                display: "flex",
+                bgcolor: "#222222",
+                alignItems: "center",
+                justifyContent: "end",
+                flex: 3,
+                overflow: "hidden",
+              }}
+            >
+              <audio
+                controls
+                src={audioUrl}
+                style={{
+                  flex: 1,
+                  bgcolor: "#222222",
+                  maxWidth: "310px",
+                  marginRight: "8px",
+                  maxHeight: "40px",
+                }}
+              />
+              <IconButton
+                onClick={() => {
+                  setAudioBlob(null);
+                  setAudioUrl("");
+                }}
+              >
+                <DeleteIcon className="text-white" />
+              </IconButton>
+            </Box>
+          ) : (
+            <TextField
+              value={chatText}
+              onChange={(e) => setChatText(e.target.value)}
+              placeholder="Type a message..."
+              variant="outlined"
+              size="small"
+              sx={{
+                flex: 1,
+                margin: 0,
+                p: 0,
+                "& .MuiInputBase-root": { color: "white" },
+                "& .MuiOutlinedInput-notchedOutline": { border: "none" },
+              }}
+            />
+          )}
+          {isRecording ? (
+            <IconButton onClick={stopRecording} color="error">
+              <StopIcon />
+            </IconButton>
+          ) : !audioBlob ? (
+            <IconButton onClick={startRecording}>
+              <KeyboardVoiceIcon className="text-white" />
+            </IconButton>
+          ) : null}
+          {
+            <IconButton
+              onClick={() => {
+                selectedFile
+                  ? selectedFile.type.startsWith("video/")
+                    ? handleSendMessage({ mediaType: "video" })
+                    : handleSendMessage({ mediaType: "image" })
+                  : audioBlob
+                  ? handleSendMessage({ mediaType: "VOICE" })
+                  : handleSendMessage({ mediaType: "text" });
+              }}
+            >
+              <SendIcon className="text-white" />
+            </IconButton>
+          }
+        </Box>
+      </Box>
+    </Box>
   );
 }
 

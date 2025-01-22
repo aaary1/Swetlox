@@ -1,24 +1,38 @@
 import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { recentChatAction } from "../reducer/recentChatReducer";
 import { privateApi } from "../utils/api";
 import Chatsidebar from "./Chatsidebar";
 
 function Chatapprightsidebar({ query }) {
   const [userConnection, setUserConnection] = useState([]);
   const [searchUser, setSearchUser] = useState([]);
+  const recentChatUser = useSelector(
+    (state) => state.recentChat.recentChatUser
+  );
+  const dispatch = useDispatch();
   const fetchUserConnectionData = async () => {
-    const { data } = await privateApi.get("/user/get-user-connection");
-    setUserConnection(data);
+    const { data } = await privateApi.get("/user/get-user-chat-history");
+    dispatch(recentChatAction.addBulkUser(data));
   };
 
   useEffect(() => {
     fetchUserConnectionData();
   }, []);
   useEffect(() => {
-    setSearchUser(
-      userConnection.filter((user) => user.userName.includes(query))
-    );
+    if (query != null && query.length != 0) {
+      setSearchUser(
+        userConnection.filter((user) => user.userName.includes(query))
+      );
+    } else {
+      setSearchUser([]);
+    }
   }, [query]);
-  console.log(searchUser);
+
+  useEffect(() => {
+    setUserConnection(recentChatUser);
+  }, [recentChatUser]);
+
   return (
     <div className="w-[100%] h-[100%] overflow-auto">
       {searchUser != null &&

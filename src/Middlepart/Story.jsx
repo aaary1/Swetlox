@@ -8,9 +8,10 @@ import StoryDialogBox from "./StoryDialogBox";
 function Story() {
   const profileURL = useSelector((state) => state.userDetails.user.profileURL);
   const [stories, setStories] = useState([]);
-  const [authStroy, setAuthStory] = useState([]);
+  const [authStroy, setAuthStory] = useState();
   const [authStroyOpen, setAuthStoryOpen] = useState(false);
   const [authStroyCurrentIndex, setAuthStoryCurrentIndex] = useState(0);
+
   const fetchStoryData = async () => {
     try {
       const { data } = await privateApi.get("/story/get-connection-story");
@@ -19,9 +20,12 @@ function Story() {
   };
 
   const fetchAuthStory = async () => {
-    const { data } = await privateApi.get("/user/get-story");
+    const { data } = await privateApi.get(
+      "/story/get-connection-story?self=true"
+    );
+    console.log("self story");
     console.log(data);
-    setAuthStory([data]);
+    setAuthStory(data);
   };
   useEffect(() => {
     fetchStoryData();
@@ -51,6 +55,7 @@ function Story() {
   const handleAuthStoryClose = () => {
     setAuthStoryOpen(false);
   };
+
   return (
     <div className="w-full h-[193px] flex overflow-x-auto scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-300">
       <div className="flex space-x-2">
@@ -63,11 +68,19 @@ function Story() {
           />
         </div>
         <AddStoryDialog open={addStory} handleClose={handleCloseStrory} />
-        {Array.isArray(authStroy) &&
-          authStroy[0]?.storyList.length > 0 &&
-          authStroy.length > 0 &&
-          authStroy.map((story, index) => (
-            <div key={index} onClick={() => handleAuthStoryOpen(index)}>
+        {authStroy && (
+          <div onClick={() => handleAuthStoryOpen(0)}>
+            <Istory
+              storyImg={authStroy.profileURL}
+              profileImg={authStroy.profileURL}
+              isUserStory={false}
+              userName={authStroy.userName}
+            />
+          </div>
+        )}
+        {stories &&
+          stories.map((story, index) => (
+            <div key={index} onClick={() => handleClickOpen(index)}>
               <Istory
                 storyImg={story.profileURL}
                 profileImg={story.profileURL}
@@ -76,21 +89,12 @@ function Story() {
               />
             </div>
           ))}
-        {stories.map((story, index) => (
-          <div key={index} onClick={() => handleClickOpen(index)}>
-            <Istory
-              storyImg={story.profileURL}
-              profileImg={story.profileURL}
-              isUserStory={false}
-              userName={story.userName}
-            />
-          </div>
-        ))}
-        {authStroy.length > 0 && authStroyOpen && (
+        {authStroyOpen && (
           <StoryDialogBox
             open={authStroyOpen}
             handleClose={handleAuthStoryClose}
-            story={authStroy[authStroyCurrentIndex]}
+            story={authStroy}
+            isSelfStory={true}
           />
         )}
         {stories.length > 0 && open && (
@@ -98,6 +102,7 @@ function Story() {
             open={open}
             handleClose={handleClose}
             story={stories[currentStoryIndex]}
+            isSelfStory={false}
           />
         )}
       </div>

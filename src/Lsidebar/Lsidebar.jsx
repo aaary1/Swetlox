@@ -7,7 +7,6 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogTitle,
   IconButton,
   TextField,
 } from "@mui/material";
@@ -18,19 +17,6 @@ import Loadder from "../loadder/Loadder";
 function Lsidebar({ setActiveComponent }) {
   const { user } = useSelector((state) => state.userDetails);
   const [isLoading, setLoading] = useState(false);
-  const handleHomeClick = () => {
-    console.log("Home clicked");
-    setActiveComponent("Middlepart");
-  };
-
-  const handleReelsClick = () => {
-    console.log("Reels clicked");
-    setActiveComponent("Reels");
-  };
-  const handleMessagebarClick = () => {
-    console.log("Chat clicked");
-    setActiveComponent("Messagebar");
-  };
 
   const [open, setOpen] = useState(false);
   const [videoFile, setVideoFile] = useState(null);
@@ -74,12 +60,12 @@ function Lsidebar({ setActiveComponent }) {
 
   return (
     <>
-      <div className="w-64 border-white shadow-md ml-32 mt-24 fixed">
+      <div className="w-64 border-white ml-32 mt-24 fixed">
         <NavLink
           to={"/profile"}
-          className="bg-[#152331] w-64 h-16 rounded-xl flex flex-row"
+          className="bg-[#152331] rounded-xl flex flex-row hover:bg-[#1d2f42] transition duration-300"
         >
-          <div className="w-[50px] m-[7px] ">
+          <div className="w-[50px] m-[7px]">
             <img
               src={user.profileURL}
               className="w-[100%] h-[50px] ml-1 rounded-full mr-2 overflow-hidden hover:cursor-pointer"
@@ -93,11 +79,10 @@ function Lsidebar({ setActiveComponent }) {
             </h5>
           </div>
         </NavLink>
-        <div className="bg-[#152331] w-64 h-[450px] rounded-xl flex-row mt-4">
+        <div className="bg-[#152331] p-1 w-64 h-[450px] rounded-xl flex-row mt-4">
           <NavLink
             to={"/"}
-            className="w-full h-[60px] flex p-[30px] pt-[20px] ml-1 mt-0 hover:cursor-pointer"
-            onClick={handleHomeClick}
+            className="w-full h-[60px]  rounded-xl flex p-[30px] pt-[20px]  mt-0 hover:bg-[#1d2f42] hover:cursor-pointer transition duration-300"
           >
             <div className="w-[45px] h-[45px]">
               <img src="src/image/Home.png" alt="" className="w-[28px]" />
@@ -108,8 +93,7 @@ function Lsidebar({ setActiveComponent }) {
           </NavLink>
           <NavLink
             to={"/reels"}
-            className="w-full h-[60px] flex p-[30px] pt-[20px] ml-1 mt-0 hover:cursor-pointer"
-            onClick={handleReelsClick}
+            className="w-full h-[60px]  rounded-xl flex p-[30px] pt-[20px]  mt-0 hover:bg-[#1d2f42] hover:cursor-pointer transition duration-300"
           >
             <div className="w-[45px] h-[45px]">
               <img src="src/image/Explore.png" alt="" className="w-[28px]" />
@@ -120,8 +104,7 @@ function Lsidebar({ setActiveComponent }) {
           </NavLink>
           <NavLink
             to={"/message"}
-            className="w-full h-[60px] flex p-[30px] pt-[20px] ml-1 mt-0 hover:cursor-pointer"
-            onClick={handleMessagebarClick}
+            className="w-full h-[60px] rounded-xl flex p-[30px] pt-[20px]  mt-0 hover:bg-[#1d2f42] hover:cursor-pointer transition duration-300"
           >
             <div className=" w-[45px] h-[45px] ">
               <img src="src/image/Message.png " alt="" className="w-[28px]" />
@@ -132,7 +115,7 @@ function Lsidebar({ setActiveComponent }) {
           </NavLink>
           <NavLink
             to={"/collections"}
-            className="w-full h-[60px] flex p-[30px] pt-[20px] ml-1 mt-0 hover:cursor-pointer"
+            className="w-full h-[60px] rounded-xl flex p-[30px] pt-[20px]  mt-0 hover:bg-[#1d2f42] hover:cursor-pointer transition duration-300"
           >
             <div className=" w-[45px] h-[45px] ">
               <img src="src/image/Bookmark.png " alt="" className="w-[28px]" />
@@ -141,35 +124,35 @@ function Lsidebar({ setActiveComponent }) {
               <h2 className="text-white text-lg font-semibold">Bookmark</h2>
             </div>
           </NavLink>
-          <div className="w-full h-[60px] flex p-[30px] pt-[20px] ml-1 mt-0 hover:cursor-pointer">
-            <div className=" w-[45px] h-[45px] ">
+          <div className="w-full h-[60px] rounded-xl flex p-[30px] pt-[20px]  mt-0 hover:bg-[#1d2f42] hover:cursor-pointer transition duration-300">
+            <div className=" w-[45px] h-[45px]">
               <img
                 src="src/image/Analaytics.png "
                 alt=""
                 className="w-[28px]"
               />
             </div>
-            <div className="ml-[20px] text-xl">
+            <div className="ml-[20px] rounded-xl text-xl">
               <h2 className="text-white text-lg font-semibold">Analytics</h2>
             </div>
           </div>
-          <div className="w-full h-[60px] flex p-[30px] pt-[20px] ml-1 mt-0 hover:cursor-pointer">
-            <div className=" w-[45px] h-[45px] ">
+          <div className="w-full h-[60px] rounded-xl flex p-[30px] pt-[20px]  mt-0 hover:bg-[#1d2f42] hover:cursor-pointer transition duration-300">
+            <div className=" w-[45px] h-[45px]">
               <img src="src/image/Theme.png " alt="" className="w-[28px]" />
             </div>
             <div className="ml-[20px] text-xl">
               <h2 className="text-white text-lg font-semibold">Theme</h2>
             </div>
           </div>
-          <div className="w-full h-[60px] flex p-[30px] pt-[20px] ml-1 mt-0 hover:cursor-pointer">
-            <div className=" w-[45px] h-[45px] ">
+          <div className="w-full h-[60px] rounded-xl flex p-[30px] pt-[20px]  mt-0 hover:bg-[#1d2f42] hover:cursor-pointer transition duration-300">
+            <div className=" w-[45px] h-[45px]">
               <img
                 src="src/image/Setting.png "
                 alt=""
                 className="w-[28px] ml-1 m-[2px]"
               />
             </div>
-            <div className="ml-[20px] text-xl">
+            <div className="ml-[20px]  rounded-xl text-xl">
               <h2 className="text-white text-lg font-semibold">Settings</h2>
             </div>
           </div>
@@ -183,6 +166,8 @@ function Lsidebar({ setActiveComponent }) {
           </button>
         </div>
       </div>
+
+      {/* Dialog Box for Video Upload */}
       <Dialog
         open={open}
         onClose={handleClose}
@@ -245,7 +230,6 @@ function Lsidebar({ setActiveComponent }) {
                 disableUnderline: true, // To remove the underline in filled variant
                 style: {
                   backgroundColor: "rgba(255, 255, 255, 0.1)", // Optional: Light transparent background for contrast
-                  // border: "1px solid white", // White border
                   color: "white",
                   borderRadius: "4px",
                 },

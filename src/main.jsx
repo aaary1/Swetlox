@@ -16,7 +16,9 @@ import Signup from "./Signup.jsx";
 import { webSocketReducer } from "./reducer/webSocketSlice.js";
 import BookMark from "./BookMark.jsx";
 import MidChatUser from "./Chat/MidChatUser.jsx";
-
+import ForgotPassword from "./ForgetPassword";
+import OtherProfile from "./otherProfile/OtherProfile.jsx";
+import recentChatReducer from "./reducer/recentChatReducer.js";
 const router = createBrowserRouter([
   {
     path: "",
@@ -28,6 +30,7 @@ const router = createBrowserRouter([
       { path: "/chat", element: <Fullchat></Fullchat> },
       { path: "/collections", element: <BookMark></BookMark> },
       { path: "/message", element: <MidChatUser></MidChatUser> },
+      { path: "/profile/:userId", element: <OtherProfile /> },
     ],
   },
   {
@@ -38,12 +41,14 @@ const router = createBrowserRouter([
     path: "/signin",
     element: <Signin></Signin>,
   },
+  { path: "/forgetpassword", element: <ForgotPassword></ForgotPassword> },
 ]);
 
 export const store = configureStore({
   reducer: {
     userDetails: userReducer,
     webSocket: webSocketReducer,
+    recentChat: recentChatReducer,
   },
 });
 ReactDOM.createRoot(document.getElementById("root")).render(

@@ -1,10 +1,11 @@
 import axios from "axios";
+import { BACKEDNURL } from "../config/config";
 
 export const publicApi = axios.create({
-  baseURL: "http://localhost:9000/swetlox/v1",
+  baseURL: BACKEDNURL + "/swetlox/v1",
 });
 export const privateApi = axios.create({
-  baseURL: "http://localhost:9000/swetlox/v1/api",
+  baseURL: BACKEDNURL + "/swetlox/v1/api",
   headers: {
     Authorization: "Bearer " + localStorage.getItem("auth"),
   },

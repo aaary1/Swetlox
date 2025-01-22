@@ -9,6 +9,11 @@ import {
   IconButton,
   Typography,
   Box,
+  FormControl,
+  FormLabel,
+  RadioGroup,
+  Radio,
+  FormControlLabel,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
@@ -18,7 +23,9 @@ import Loadder from "../loadder/Loadder";
 function UploadPostDialog({ open, handleClose }) {
   const [file, setFile] = useState(null);
   const [caption, setCaption] = useState("");
+  const [visibility, setVisibility] = useState("Public"); // Default visibility
   const [loading, setLoading] = useState(false);
+
   const handleFileChange = (event) => {
     setFile(event.target.files[0]);
   };
@@ -27,16 +34,25 @@ function UploadPostDialog({ open, handleClose }) {
     setCaption(event.target.value);
   };
 
+  const handleVisibilityChange = (event) => {
+    setVisibility(event.target.value);
+  };
+
   const handlePostUpload = async () => {
+    const isPrivate = visibility == "Public" ? false : true;
     const formData = new FormData();
     formData.append("file", file);
     formData.append("caption", caption);
+    formData.append("visibility", isPrivate);
+
     setLoading(true);
-    const { data } = await privateApi.post("/post", formData);
+    await privateApi.post("/post", formData); // Post the form data to the backend
     setFile(null);
     setCaption("");
+    setVisibility("Public");
     setLoading(false);
   };
+
   const handlePost = async () => {
     await handlePostUpload();
     handleClose();
@@ -60,11 +76,11 @@ function UploadPostDialog({ open, handleClose }) {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          minHeight: "200px", // Adjust based on your content's height
+          minHeight: "300px", // Adjusted height to fit additional UI
         }}
       >
         {loading ? (
-          <Loadder></Loadder>
+          <Loadder />
         ) : (
           <>
             <Box
@@ -129,6 +145,39 @@ function UploadPostDialog({ open, handleClose }) {
                 textarea: { color: "#fff" },
               }}
             />
+            <Box mt={3} width="100%">
+              <FormControl component="fieldset">
+                <FormLabel component="legend" sx={{ color: "#fff" }}>
+                  Visibility
+                </FormLabel>
+                <RadioGroup
+                  row
+                  value={visibility}
+                  onChange={handleVisibilityChange}
+                >
+                  <FormControlLabel
+                    value="Public"
+                    control={<Radio sx={{ color: "#fff" }} />}
+                    label="Public"
+                    sx={{ color: "#fff" }}
+                  />
+                  <FormControlLabel
+                    value="Private"
+                    control={<Radio sx={{ color: "#fff" }} />}
+                    label="Private"
+                    sx={{ color: "#fff" }}
+                  />
+                </RadioGroup>
+              </FormControl>
+              <Typography
+                variant="caption"
+                sx={{ color: "#bbb", display: "block", mt: 1 }}
+              >
+                {visibility === "Public"
+                  ? "Your post will be visible to all users."
+                  : "Your post will only be visible to your followers."}
+              </Typography>
+            </Box>
           </>
         )}
       </DialogContent>
@@ -144,6 +193,7 @@ function UploadPostDialog({ open, handleClose }) {
             ":hover": { bgcolor: "#ff6333" },
             color: "#fff",
           }}
+          disabled={!file}
         >
           Post
         </Button>

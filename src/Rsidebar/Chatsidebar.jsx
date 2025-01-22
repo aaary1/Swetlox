@@ -3,12 +3,12 @@ import { useNavigate } from "react-router-dom";
 function Chatsidebar({ userData }) {
   const navigate = useNavigate();
   const handleChatOpen = () => {
-    navigate("/chat?id=" + userData.email);
+    navigate("/chat?id=" + userData.userId);
   };
 
   return (
     <div
-      className="w-[250px]  h-15 rounded-xl flex flex-row  hover:cursor-pointer border mx-1 my-1"
+      className="w-[250px]  h-15 rounded-xl flex flex-row   hover:cursor-pointer hover:bg-[#1d2f42]  mx-1 my-1"
       onClick={handleChatOpen}
     >
       <div className="mr-2">

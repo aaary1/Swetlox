@@ -1,46 +1,52 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Dialog,
-  DialogActions,
-  DialogContent,
   DialogTitle,
-  Button,
+  DialogContent,
+  DialogActions,
   IconButton,
+  CircularProgress,
+  Fab,
 } from "@mui/material";
-import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import CloseIcon from "@mui/icons-material/Close";
+import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
+import UploadIcon from "@mui/icons-material/CloudUpload";
 import { privateApi } from "../utils/api";
-import Loadder from "../loadder/Loadder";
 
 const AddStoryDialog = ({ open, handleClose }) => {
-  const [selectedImages, setSelectedImages] = useState([]);
+  const [selectedStory, setSelectedStory] = useState([]);
   const [isLoading, setLoading] = useState(false);
 
-  // Function to handle file selection and update state with multiple images
+  // Handle file input
   const handleImageChange = (event) => {
     const files = Array.from(event.target.files); // Convert FileList to an array
-    setSelectedImages((prevImages) => [...prevImages, ...files]); // Append new files to existing state
+    setSelectedStory((prevImages) => [...prevImages, ...files]); // Append new files to existing state
   };
 
-  // Function to handle image submission (send to server)
   const handleSubmit = async () => {
+    console.log("calling.......");
     setLoading(true);
     const formData = new FormData();
-    selectedImages.forEach((image, index) => {
-      formData.append("multipartFiles", image);
+    selectedStory.forEach((story) => {
+      const mediaType = story.type.startsWith("video/") ? "VIDEO" : "IMAGE";
+      formData.append("files", story); // Add the file
+      console.log(story);
+      formData.append("mediaTypes", mediaType); // Add the corresponding media type
     });
 
-    // Example API call to send images to the server
+    console.log(formData);
+
     try {
       await privateApi.post("/story/save", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
+
       setLoading(false);
-      setSelectedImages([]);
+      setSelectedStory([]);
       handleClose();
-    } catch (ex) {
+    } catch (error) {
       setLoading(false);
     }
   };
@@ -48,8 +54,8 @@ const AddStoryDialog = ({ open, handleClose }) => {
   return (
     <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
       {isLoading ? (
-        <div className="w-full bg-[#1c1c1c] h-[350px] flex justify-center items-center ">
-          <Loadder></Loadder>
+        <div className="w-full bg-[#1c1c1c] h-[350px] flex justify-center items-center">
+          <CircularProgress style={{ color: "#ff3d00" }} />
         </div>
       ) : (
         <div className="bg-[#1c1c1c] text-white">
@@ -60,43 +66,77 @@ const AddStoryDialog = ({ open, handleClose }) => {
             </IconButton>
           </DialogTitle>
           <DialogContent>
-            <div className="mb-4">
-              <label className="block mb-2 text-sm">Select Images</label>
-              <input
-                type="file"
-                multiple
-                accept="image/*"
-                onChange={handleImageChange}
-                className="bg-gray-800 text-white p-2 rounded"
-              />
+            <div className="mb-6">
+              <label className="block mb-3 text-sm">Select Images</label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="file"
+                  multiple
+                  onChange={handleImageChange}
+                  className="hidden"
+                  id="upload-images"
+                />
+                <label
+                  htmlFor="upload-images"
+                  className="cursor-pointer bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 shadow-lg transform hover:scale-105 transition duration-300"
+                >
+                  <AddPhotoAlternateIcon /> Choose Files
+                </label>
+              </div>
             </div>
 
-            {selectedImages.length > 0 && (
-              <div className="grid grid-cols-6 gap-2">
-                {selectedImages.map((image, index) => (
-                  <img
-                    key={index}
-                    src={URL.createObjectURL(image)}
-                    alt={`Preview ${index}`}
-                    className="h-24 w-24 object-cover rounded"
-                  />
-                ))}
+            {selectedStory.length > 0 && (
+              <div className="grid grid-cols-5 gap-4 mt-4">
+                {selectedStory.map((story, index) =>
+                  story.type.startsWith("video/") ? (
+                    <div
+                      key={index}
+                      className="relative rounded overflow-hidden group cursor-pointer"
+                    >
+                      <video
+                        controls
+                        autoPlay
+                        loop
+                        src={URL.createObjectURL(story)}
+                        className="h-24 w-24 object-cover rounded transition-transform duration-300 group-hover:scale-110"
+                      />
+                    </div>
+                  ) : (
+                    <div
+                      key={index}
+                      className="relative rounded overflow-hidden group cursor-pointer"
+                    >
+                      <img
+                        src={URL.createObjectURL(story)}
+                        alt={`Preview ${index}`}
+                        className="h-24 w-24 object-cover rounded transition-transform duration-300 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-black bg-opacity-40 flex justify-center items-center opacity-0 group-hover:opacity-100 transition duration-300">
+                        <span className="text-sm text-white">Preview</span>
+                      </div>
+                    </div>
+                  )
+                )}
               </div>
             )}
           </DialogContent>
-          <DialogActions>
-            <Button
+          <DialogActions className="justify-center">
+            <Fab
               onClick={handleSubmit}
-              variant="contained"
-              className=" text-white"
-              sx={{ background: "#ff3d00" }}
+              style={{
+                background:
+                  "linear-gradient(45deg, rgba(255,61,0,1) 30%, rgba(255,105,0,1) 90%)",
+                color: "white",
+              }}
+              className="hover:shadow-2xl transform hover:scale-110 transition duration-300"
             >
-              Upload
-            </Button>
+              <UploadIcon />
+            </Fab>
           </DialogActions>
         </div>
       )}
     </Dialog>
   );
 };
+
 export default AddStoryDialog;

@@ -4,39 +4,45 @@ import { NavLink } from "react-router-dom";
 import { privateApi } from "../utils/api";
 import {
   Box,
+  Avatar,
+  Menu,
+  MenuItem,
   TextField,
   InputAdornment,
-  IconButton,
   List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  Avatar,
-  Button,
+  IconButton,
   Typography,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import ExitToAppIcon from "@mui/icons-material/ExitToApp";
-import NotificationDialog from "../Notification";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 import SearchUser from "./SearchUser";
+import NotificationDialog from "../Notification";
+import LogoutIcon from "@mui/icons-material/Logout";
 
 function Navbar() {
   const { user } = useSelector((state) => state.userDetails);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
   const [searchData, setSearchData] = useState(null);
-  const [] = useState();
+
+  const handleMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
 
   const handleLogout = () => {
-    let res = confirm("Are you sure you want to logout?");
-    if (res) {
-      localStorage.removeItem("auth");
-      window.location.reload();
-    }
+    localStorage.removeItem("auth");
+    window.location.reload();
   };
 
   const handleSearchUser = async (query) => {
     if (query) {
       const { data } = await privateApi.get(`/user/search-user?query=${query}`);
-      setSearchData(data);
+      const filterData = data.filter((q) => q.email !== user.email);
+      setSearchData(filterData);
     } else {
       setSearchData(null);
     }
@@ -68,7 +74,6 @@ function Navbar() {
 
       {/* Centered Search Bar */}
       <Box
-        component="form"
         sx={{
           flexGrow: 1,
           display: "flex",
@@ -113,8 +118,7 @@ function Navbar() {
             sx={{
               position: "absolute",
               top: "100%",
-              left: "13%",
-              width: "675px",
+              width: "700px",
               maxHeight: "200px",
               bgcolor: "#000",
               borderRadius: "10px",
@@ -122,42 +126,61 @@ function Navbar() {
               zIndex: 2000,
             }}
           >
-            {searchData.map((user) => {
-              return <SearchUser user={user}></SearchUser>;
-            })}
+            {searchData.map((user) => (
+              <SearchUser user={user} />
+            ))}
           </List>
         )}
       </Box>
-      <NotificationDialog></NotificationDialog>
 
+      <NotificationDialog></NotificationDialog>
       {/* Profile and Logout */}
       <Box sx={{ display: "flex", alignItems: "center", ml: "auto" }}>
-        <Button
-          onClick={handleLogout}
-          startIcon={<ExitToAppIcon />}
-          sx={{
-            bgcolor: "#ff3d00",
-            color: "#fff",
-            fontWeight: "bold",
-            borderRadius: "50px",
-            px: 4,
-            "&:hover": {
-              bgcolor: "#ff6347",
+        <IconButton onClick={handleMenuOpen} sx={{ color: "#fff" }}>
+          <MoreVertIcon />
+        </IconButton>
+        <Menu
+          anchorEl={anchorEl}
+          open={open}
+          onClose={handleMenuClose}
+          PaperProps={{
+            sx: {
+              bgcolor: "#152331",
+              color: "#fff",
             },
           }}
         >
-          Logout
-        </Button>
-        <NavLink to="/profile" style={{ marginLeft: "20px" }}>
-          <Avatar
-            src={user.profileURL}
+        <MenuItem
+            component={NavLink}
+            to="/profile"
             sx={{
-              width: 50,
-              height: 50,
-              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
             }}
-          />
-        </NavLink>
+          >
+            <Avatar
+              src={user.profileURL}
+              sx={{
+                width: 30,
+                height: 30,
+              }}
+            />
+            <Typography>Profile</Typography>
+          </MenuItem>
+          <MenuItem
+            onClick={handleLogout}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+            }}
+          >
+            <LogoutIcon></LogoutIcon>
+            <Typography>Logout</Typography>
+          </MenuItem>
+          
+        </Menu>
       </Box>
     </Box>
   );

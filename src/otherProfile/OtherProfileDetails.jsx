@@ -1,9 +1,8 @@
-import ProfilePosts from "./Profilepost";
 import "../css/c.css";
-import EditProfileModel from "./EditProfileModel";
 import { useEffect, useState } from "react";
-import ConnectionDialogBox from "../ConnectionDialogBox";
 import { privateApi } from "../utils/api";
+import ConnectionDialogBox from "../ConnectionDialogBox";
+import ProfilePosts from "../Profile/Profilepost";
 import { useNavigate } from "react-router-dom";
 const followersData = [
   {
@@ -63,46 +62,32 @@ const followersData = [
     isFollowing: false,
   },
 ];
-function Profiledetails({ profiledetails }) {
-  const [opne, setOpen] = useState(false);
+function OtherProfileDetails({ profiledetails, userId }) {
   const [followerData, setFollowerData] = useState([]);
   const [followingData, setFollowingData] = useState([]);
-  const [followerCurrentPageNum, setFollowerCurrentPage] = useState(0);
-  const [followingCurrentPageNum, setFollowingCurrentPage] = useState(0);
-  const [hasMoreFollower, setHasMoreFollower] = useState(false);
-  const [hasMoreFollowing, setHasMoreFollowing] = useState(false);
   const [openFollowerDialog, setOpenFollowerDialog] = useState(false);
   const [openFollowingDialog, setOpenFollowingDialog] = useState(false);
   const navigate = useNavigate();
-  const handleFetchUserConnection = async (type, pageNum) => {
+  const handleFetchUserConnection = async (type) => {
     const { data } = await privateApi.get(
-      `/user/get-user-connection/${type}?pageNum=${pageNum}`
+      `/user/get-user-connection/${userId}/${type}`
     );
     if (type == "follower") {
-      setHasMoreFollower(!data.last);
-      setFollowerData((prev) => [...prev, ...data.content]);
+      setFollowerData((prev) => [...prev, ...data]);
     } else {
-      setHasMoreFollowing(!data.last);
-      setFollowingData((prev) => [...prev, ...data.content]);
+      setFollowingData((prev) => [...prev, ...data]);
     }
   };
 
   useEffect(() => {
-    handleFetchUserConnection("follower", followerCurrentPageNum);
-  }, []);
+    setFollowerData([]);
+    handleFetchUserConnection("follower");
+  }, [userId]);
 
   useEffect(() => {
-    setFollowingCurrentPage((prev) => prev + 1);
-    handleFetchUserConnection("following", followingCurrentPageNum);
-  }, []);
-
-  const handleProfileEditOpen = () => {
-    setOpen(true);
-  };
-
-  const handleProfileEditClose = () => {
-    setOpen(false);
-  };
+    setFollowingData([]);
+    handleFetchUserConnection("following");
+  }, [userId]);
   const handleClose = (type) => {
     console.log(type);
     if (type == "follower") {
@@ -128,32 +113,21 @@ function Profiledetails({ profiledetails }) {
         open={openFollowerDialog}
         followers={followerData}
         onClose={() => handleClose("follower")}
-        fetchMoreFollowers={() => {
-          setFollowerCurrentPage((prev) => prev + 1);
-          handleFetchUserConnection("follower", followerCurrentPageNum);
-        }}
-        hasMoreFollowers={hasMoreFollower}
+        otherUser={true}
         onViewProfile={onViewProfile}
         eventType="follower"
-        otherUser={false}
       ></ConnectionDialogBox>
       <ConnectionDialogBox
         open={openFollowingDialog}
         followers={followingData}
-        fetchMoreFollowers={() => {
-          setFollowingCurrentPage((prev) => prev + 1);
-          console.log("call following.....");
-          handleFetchUserConnection("following", followingCurrentPageNum);
-        }}
-        hasMoreFollowers={hasMoreFollowing}
-        onClose={() => handleClose("following")}
+        otherUser={true}
         onViewProfile={onViewProfile}
+        onClose={() => handleClose("following")}
         eventType="following"
-        otherUser={false}
       ></ConnectionDialogBox>
       <div className="w-[710px] h-[600px] mt-24 rounded-xl ml-[400px] bg-[#0c0a15] fixed">
         <div className="overflow-y-scroll no-scrollbar">
-          <div className="flex justify-center border-2 border-indigo-500/100 mt-5 mx-5 h-[250px] border-b-0">
+          <div className="flex justify-center border-2 border-indigo-500 mt-5 mx-5 h-[250px] ">
             <div>
               <img
                 src={profiledetails?.profileURL}
@@ -203,15 +177,6 @@ function Profiledetails({ profiledetails }) {
               </div>
             </div>
           </div>
-          <div className="ml-5">
-            <button
-              type="button"
-              className="text-white bg-indigo-500/100 hover:bg-blue-800 font-medium rounded-b-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 w-[670px]"
-              onClick={handleProfileEditOpen}
-            >
-              Edit Profile
-            </button>
-          </div>
           <div>
             <div className="ml-[290px] mt-3">
               <h1 className="text-white font-medium text-xl hover:cursor-pointer ml-[43px]">
@@ -221,17 +186,12 @@ function Profiledetails({ profiledetails }) {
             <div className="bg-indigo-500/100 h-1 w-[670px] ml-5 m-1" />
           </div>
           <div className="h-[230px] mx-5 w-[670px] pt-5 h-42">
-            <ProfilePosts userId={profiledetails.userId} />
+            <ProfilePosts userId={userId} />
           </div>
         </div>
       </div>
-      <EditProfileModel
-        open={opne}
-        handleClose={handleProfileEditClose}
-        data={profiledetails}
-      ></EditProfileModel>
     </>
   );
 }
 
-export default Profiledetails;
+export default OtherProfileDetails;

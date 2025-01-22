@@ -7,6 +7,7 @@ import {
   ListItemAvatar,
   ListItemText,
   Modal,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { blue } from "@mui/material/colors";
@@ -59,19 +60,19 @@ const PostModel = ({ open, handleClose, postData, handleDeletePost }) => {
         <div className="w-[100%] h-[80vh] flex">
           <div className="relative w-[50%] h-[80vh]">
             {/* Delete Button */}
-            <IconButton
-              aria-label="delete"
-              sx={{
-                position: "absolute",
-                top: 16,
-                left: 16,
-                color: "white",
-                zIndex: 2,
-              }}
-              onClick={() => handleDeletePost(postData.postId)}
-            >
-              <DeleteIcon className="text-red-600 text-lg" />
-            </IconButton>
+            <Tooltip title="Delete">
+              <IconButton
+                sx={{
+                  bgcolor: "black",
+                  "&:hover": { bgcolor: "rgba(255, 0, 0, 0.5)" },
+                  position: "absolute",
+                }}
+                onClick={() => handleDeletePost(postData.postId)}
+                size="small"
+              >
+                <DeleteIcon sx={{ color: "white" }} />
+              </IconButton>
+            </Tooltip>
             {/* Image or Video */}
             {postData?.postURL && (
               <img
@@ -90,7 +91,7 @@ const PostModel = ({ open, handleClose, postData, handleDeletePost }) => {
               />
             )}
           </div>
-          <div className="bg-black w-[50%] h-[80vh]">
+          <div className="bg-[#222222] w-[50%] h-[80vh]">
             <PostHeader
               userName={postData.userName}
               createdAt={postData.createdAt}

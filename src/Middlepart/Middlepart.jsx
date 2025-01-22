@@ -1,66 +1,67 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import "../css/c.css";
 import Postbar from "./Postbar";
 import Story from "./Story";
 import Post from "./Post";
 import { privateApi } from "../utils/api";
 import Loadder from "../loadder/Loadder";
+import InfiniteScroll from "react-infinite-scroll-component";
 
 function Middlepart() {
-  const [hasMore, setMore] = useState(true);
   const [postPage, setPostPage] = useState(0);
   const [postList, setPostList] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [hasMore, setMore] = useState(true);
 
-  useEffect(() => {
-    console.log(hasMore, " more page have");
-    if (hasMore) {
-      const loadPost = async () => {
-        setLoading(true);
-        const { data } = await privateApi.get(`/post/load-posts/${postPage}`);
-        console.log(data);
-        setLoading(false);
-        postPage === 0
-          ? setPostList(data.content)
-          : setPostList((prev) => [...prev, ...data.content]);
-
-        setMore(!data.last);
-      };
-      loadPost();
+  // Load posts from API
+  const loadPost = useCallback(async () => {
+    try {
+      const { data } = await privateApi.get(`/post/load-posts/${postPage}`);
+      console.log(data);
+      setPostList((prev) => [...prev, ...data.content]);
+      setMore(!data.last); // Update `hasMore` based on `data.last`
+    } catch (error) {
+      console.error("Error fetching posts:", error);
     }
   }, [postPage]);
 
-  const handleScroll = () => {
-    if (
-      window.innerHeight + document.documentElement.scrollTop >=
-        document.documentElement.scrollHeight - 10 &&
-      hasMore
-    ) {
+  // Fetch posts whenever the page changes
+  useEffect(() => {
+    loadPost();
+  }, [postPage, loadPost]);
+
+  // Trigger the next page fetch
+  const fetchMoreData = () => {
+    if (hasMore) {
       setPostPage((prevPage) => prevPage + 1);
     }
   };
 
-  useEffect(() => {
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [hasMore]);
-
   return (
-    <>
-      <div className=" w-[700px]   ml-[405px] mt-24  h-[640px]  fixed rounded-xl">
-        <div className="overflow-y-scroll no-scrollbar  h-[640px] rounded-t-xl">
-          <Story />
-          <Postbar />
-          <div className="w-[100%] h-fit flex justify-center items-center flex-col">
-            {loading ? (
-              <Loadder></Loadder>
-            ) : (
-              postList.map((post) => <Post key={post.id} post={post} />)
-            )}
-          </div>
+    <div
+      id="scrollableDiv"
+      className="w-[700px] ml-[405px] mt-24 h-[600px] fixed overflow-y-auto no-scrollbar rounded-xl"
+    >
+      {/* Top Components */}
+      <Story />
+      <Postbar />
+
+      {/* Infinite Scroll Container */}
+      <InfiniteScroll
+        dataLength={postList.length} // Length of the current data
+        next={fetchMoreData} // Function to fetch more data
+        hasMore={hasMore} // Condition to fetch more data
+        loader={<Loadder />} // Loader component
+        scrollableTarget="scrollableDiv" // Specify the correct container
+        style={{ overflow: "hidden" }} // Prevent extra scrollbars
+      >
+        <div className="w-[100%] flex flex-col items-center">
+          {postList.map((post) => (
+            <Post key={post.id} post={post} />
+          ))}
         </div>
-      </div>
-    </>
+      </InfiniteScroll>
+    </div>
   );
 }
+
 export default Middlepart;
