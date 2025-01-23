@@ -24,7 +24,7 @@ function Postbar() {
         display: "flex",
         alignItems: "center",
         padding: "10px 20px",
-        backgroundColor: "#152331",
+        backgroundColor: "#172520",
         borderRadius: "30px",
         margin: "20px 0",
         boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.25)",

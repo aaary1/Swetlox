@@ -39,14 +39,14 @@ export function Profilepost({ postss, handleDeletePost }) {
 
   return (
     <div
-      className="bg-black w-[213px] h-[250px] ml-2 mb-2 relative"
+      className="bg-black w-[213px] h-[213px] ml-2 mb-2 relative"
       onMouseEnter={handleHoverIn}
       onMouseLeave={handleHoverOut}
     >
       <img
         src={postss.postURL}
         alt="Profile Post"
-        className="w-full  h-full object-fill"
+        className="w-140px  h-140px object-fill"
       />
       {hover && (
         <div

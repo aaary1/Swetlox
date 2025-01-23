@@ -24,7 +24,7 @@ const Comment = ({ handleComment, comment, handleCommentSubmit }) => {
           onChange={(e) => handleComment(e.target.value)}
         />
         {/* Post Button */}
-        {comment && (
+        
           <Button
             onClick={() => handleCommentSubmit()}
             variant="contained"
@@ -42,7 +42,7 @@ const Comment = ({ handleComment, comment, handleCommentSubmit }) => {
           >
             Post
           </Button>
-        )}
+        
       </div>
       {/* Divider */}
       <div className="mt-4 border-t border-gray-700"></div>
@@ -51,3 +51,4 @@ const Comment = ({ handleComment, comment, handleCommentSubmit }) => {
 };
 
 export default Comment;
+

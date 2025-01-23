@@ -63,12 +63,13 @@ function Lsidebar({ setActiveComponent }) {
       <div className="w-64 border-white ml-32 mt-24 fixed">
         <NavLink
           to={"/profile"}
-          className="bg-[#152331] rounded-xl flex flex-row hover:bg-[#1d2f42] transition duration-300"
+          className="bg-[#172520] rounded-xl flex flex-row hover:bg-[#1d2f42] transition duration-300"
         >
-          <div className="w-[50px] m-[7px]">
+          <div className=" w-[50px] m-[7px]">
             <img
+              
               src={user.profileURL}
-              className="w-[100%] h-[50px] ml-1 rounded-full mr-2 overflow-hidden hover:cursor-pointer"
+              className=" object-cover w-[100%] h-[50px] ml-1 rounded-full mr-2 overflow-hidden hover:cursor-pointer"
               alt=""
             />
           </div>
@@ -78,8 +79,9 @@ function Lsidebar({ setActiveComponent }) {
               @{user.userName}
             </h5>
           </div>
+        
         </NavLink>
-        <div className="bg-[#152331] p-1 w-64 h-[450px] rounded-xl flex-row mt-4">
+        <div className="bg-[#172520] p-1 w-64 h-[450px] rounded-xl flex-row mt-4">
           <NavLink
             to={"/"}
             className="w-full h-[60px]  rounded-xl flex p-[30px] pt-[20px]  mt-0 hover:bg-[#1d2f42] hover:cursor-pointer transition duration-300"

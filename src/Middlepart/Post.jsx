@@ -128,7 +128,7 @@ function Post({ post }) {
   console.log(post);
   return (
     <>
-      <div className="bg-[#152331] w-full rounded-xl p-4 mb-4">
+      <div className="bg-[#172520] w-full rounded-xl p-4 mb-4">
         <PostHeader
           userName={post.postUser.userName}
           createdAt={timeAgo(post.createdAt)}

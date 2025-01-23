@@ -151,41 +151,53 @@ function Profiledetails({ profiledetails }) {
         eventType="following"
         otherUser={false}
       ></ConnectionDialogBox>
-      <div className="w-[710px] h-[600px] mt-24 rounded-xl ml-[400px] bg-[#0c0a15] fixed">
+      <div className="w-[710px] h-[600px] mt-24 rounded-xl ml-[400px] bg-[#172520] fixed  overflow-hidden">
         <div className="overflow-y-scroll no-scrollbar">
-          <div className="flex justify-center border-2 border-indigo-500/100 mt-5 mx-5 h-[250px] border-b-0">
+            {/* <div className="flex justify-center border-2 border-indigo-500/100 mt-5 mx-5 h-[250px] border-b-0"> */}
             <div>
               <img
                 src={profiledetails?.profileURL}
-                className="w-[100px] h-[100px] ml-6 mt-6 rounded-full hover:cursor-pointer"
+                className="object-cover w-[150px] h-[150px] ml-[280px] mt-6 rounded-full hover:cursor-pointer"
                 alt="Profile"
+                onClick={handleProfileEditOpen}
               />
-              <div className="mt-2 ml-6">
-                <h1 className="text-white font-medium text-lg hover:cursor-pointer text-center">
+              <div className="mt-4 ml-3">
+                <h1 className="text-white font-mono text-2xl hover:cursor-pointer text-center">
                   {profiledetails?.userName}
                 </h1>
               </div>
             </div>
             <div>
-              <div className=" w-[240px] h-[70px] mt-[30px] ml-[120px] flex space-x-4">
-                <div className="w-[50px] h-full ">
+              <div className="w-[66%] ml-[17%] mr-[17%] mt-[1%]">
+                <h1 className="text-[#95ada4] text-center" >"📍 Living the dream | 💻 Coding my way to AI | 🌍 Exploring tech & life | DM for collabs 🤝 | 🚀 Always learning, always growing"</h1>
+              </div>
+              
+            </div>
+            <div>
+            <div className="h-[70px] mt-[5%] w-[510px] bg-[rgba(58,90,64,0.4)] rounded-lg flex justify-between items-center mx-auto my-auto px-4">
+  
+
+
+                <div className="w-[170px] h-full bg-[black] flex flex-col justify-center items-center">
                   <h1 className="text-white font-medium text-2xl hover:cursor-pointer  ">
                     {profiledetails?.postCount}
                   </h1>
                   <h5 className="text-white text-lg hover:cursor-pointer ">
                     Posts
                   </h5>
-                </div>
-                <div className="h-full" onClick={() => handleOpen("follower")}>
+                </div> 
+
+                 <div className="h-full w-[170px] bg-[rgba(0,0,0,0.7)]  flex flex-col justify-center items-center" onClick={() => handleOpen("follower")}>
                   <h1 className="text-white  text-2xl hover:cursor-pointer ">
                     {profiledetails?.follower}
                   </h1>
                   <h5 className="text-white  text-lg hover:cursor-pointer ">
                     Followers
                   </h5>
-                </div>
+                </div> 
+
                 <div
-                  className="w-[] h-full"
+                  className=" h-full w-[170px] bg-black  flex flex-col justify-center items-center ml-auto"
                   onClick={() => handleOpen("following")}
                 >
                   <h1 className="text-white  text-2xl hover:cursor-pointer ">
@@ -195,15 +207,16 @@ function Profiledetails({ profiledetails }) {
                     Following
                   </h5>
                 </div>
+
               </div>
-              <div className="text-white text-lg px-4 h-[110px] w-[400px] ml-[100px] mt-2 overflow-y-scroll no-scrollbar ">
+              {/* <div className="text-white text-lg px-4 h-[110px] w-[400px] ml-[100px] mt-2 overflow-y-scroll no-scrollbar ">
                 {profiledetails?.bio?.map((bio) => {
                   return <p className="text-sm">{bio}</p>;
                 })}
-              </div>
-            </div>
-          </div>
-          <div className="ml-5">
+              </div> */}
+            </div> 
+          {/* </div>  */}
+          {/* <div className="ml-5">
             <button
               type="button"
               className="text-white bg-indigo-500/100 hover:bg-blue-800 font-medium rounded-b-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 w-[670px]"
@@ -211,14 +224,14 @@ function Profiledetails({ profiledetails }) {
             >
               Edit Profile
             </button>
-          </div>
+          </div> */}
           <div>
-            <div className="ml-[290px] mt-3">
+            <div className="ml-[290px] mt-7 ">
               <h1 className="text-white font-medium text-xl hover:cursor-pointer ml-[43px]">
                 POST
               </h1>
             </div>
-            <div className="bg-indigo-500/100 h-1 w-[670px] ml-5 m-1" />
+            <div className="bg-[rgba(0,0,0,0.5)] h-1 w-[670px] ml-5 m-1" />
           </div>
           <div className="h-[230px] mx-5 w-[670px] pt-5 h-42">
             <ProfilePosts userId={profiledetails.userId} />

@@ -50,7 +50,7 @@ const PostHeader = ({ userName, createdAt, profileURL }) => {
             src={profileURL}
             alt="User Avatar"
             style={{
-              width: "100%",
+              width: "00%",
               height: "100%",
               objectFit: "cover",
               borderRadius: "50%",

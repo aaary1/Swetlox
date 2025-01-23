@@ -12,6 +12,7 @@ import Loadder from "./loadder/Loadder";
 import AdminDashboard from "./admin/AdminDashboard";
 import { toast } from "react-toastify";
 import { FRONTEDURL } from "./config/config";
+import UserPanel from "./Admins/UserPanel"; 
 
 function App() {
   const dispatch = useDispatch();
@@ -74,6 +75,7 @@ function App() {
         <div className="flex">
           <Lsidebar />
           <Outlet />
+         
           <Rsidebar />
         </div>
       ) : (

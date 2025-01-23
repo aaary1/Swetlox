@@ -12,7 +12,7 @@ function Rsidebar() {
   return (
     <>
       <div className=" h-[600px] w-[280px] mt-24 rounded-t-lg fixed ml-[1125px]">
-        <div className="w-[280px]  shadow-md rounded-xl bg-[#152331] overflow-hidden">
+        <div className="w-[280px]  shadow-md rounded-xl bg-[#172520] overflow-hidden">
           <div className="flex pt-3">
             <h1 className="text-white font-medium ml-4">Messages</h1>
             <img
@@ -61,7 +61,7 @@ function Rsidebar() {
         <div className="text-white mx-3 mt-2 mb-2 font-bold">
           <h1>Requests</h1>
         </div>
-        <div className=" h-[120px] w-[280px] pt-2 shadow-md rounded-xl bg-[#152331]">
+        <div className=" h-[120px] w-[280px] pt-2 shadow-md rounded-xl bg-[#172520]">
           <div>
             <Requests />
           </div>

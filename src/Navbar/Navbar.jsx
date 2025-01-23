@@ -51,7 +51,7 @@ function Navbar() {
   return (
     <Box
       sx={{
-        bgcolor: "#152331",
+        bgcolor: "#172520",
         width: "100%",
         height: "80px",
         display: "flex",
