@@ -150,7 +150,7 @@ function Navbar() {
             },
           }}
         >
-        <MenuItem
+          <MenuItem
             component={NavLink}
             to="/profile"
             sx={{
@@ -179,7 +179,6 @@ function Navbar() {
             <LogoutIcon></LogoutIcon>
             <Typography>Logout</Typography>
           </MenuItem>
-          
         </Menu>
       </Box>
     </Box>

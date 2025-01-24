@@ -12,7 +12,7 @@ import Loadder from "./loadder/Loadder";
 import AdminDashboard from "./admin/AdminDashboard";
 import { toast } from "react-toastify";
 import { FRONTEDURL } from "./config/config";
-import UserPanel from "./Admins/UserPanel"; 
+import UserPanel from "./UserPanel/UserPanel";
 
 function App() {
   const dispatch = useDispatch();
@@ -70,7 +70,7 @@ function App() {
 
   return (
     <>
-      <Navbar />
+      {/* <Navbar />
       {userDetails.user.roleList[0].role !== "ADMIN" ? (
         <div className="flex">
           <Lsidebar />
@@ -80,7 +80,8 @@ function App() {
         </div>
       ) : (
         <AdminDashboard />
-      )}
+      )} */}
+      <UserPanel></UserPanel>
     </>
   );
 }
